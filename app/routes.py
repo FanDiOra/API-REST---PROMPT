@@ -14,7 +14,7 @@ def register():
         login=data['login'],
         password=data['password'],  # Password should be hashed
         role=data['role'],
-        group=data['groupe']
+        # group=data['groupe']
     )
     db.session.add(new_user)
     db.session.commit()

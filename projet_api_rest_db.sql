@@ -5,12 +5,12 @@
 CREATE TYPE user_role AS ENUM ('admin', 'user');
 
 -- Création des tables
-CREATE TABLE "Group" (
+CREATE TABLE "group" (
     groupID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE "User" (
+CREATE TABLE "user" (
     userID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     firstname VARCHAR(255) NOT NULL,
     lastname VARCHAR(255) NOT NULL,
@@ -20,10 +20,10 @@ CREATE TABLE "User" (
     groupID INT,
     CONSTRAINT fk_group
         FOREIGN KEY(groupID) 
-        REFERENCES "Group"(groupID)
+        REFERENCES "group"(groupID)
 );
 
-CREATE TABLE "Prompt" (
+CREATE TABLE "prompt" (
     promptID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     content TEXT NOT NULL,
     status VARCHAR(50) NOT NULL,
@@ -33,62 +33,62 @@ CREATE TABLE "Prompt" (
     userID INT NOT NULL,
     CONSTRAINT fk_user_prompt
         FOREIGN KEY(userID) 
-        REFERENCES "User"(userID)
+        REFERENCES "user"(userID)
 );
 
-CREATE TABLE "Vote" (
+CREATE TABLE "vote" (
     voteID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     voteValue INT NOT NULL,
     userID INT NOT NULL,
     promptID INT NOT NULL,
     CONSTRAINT fk_user
         FOREIGN KEY(userID) 
-        REFERENCES "User"(userID),
+        REFERENCES "user"(userID),
     CONSTRAINT fk_prompt
         FOREIGN KEY(promptID)
-        REFERENCES "Prompt"(promptID)
+        REFERENCES "prompt"(promptID)
 );
 
-CREATE TABLE "Note" (
+CREATE TABLE "note" (
     noteID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     noteValue INT NOT NULL,
     userID INT NOT NULL,
     promptID INT NOT NULL,
     CONSTRAINT fk_user_note
         FOREIGN KEY(userID) 
-        REFERENCES "User"(userID),
+        REFERENCES "user"(userID),
     CONSTRAINT fk_prompt_note
         FOREIGN KEY(promptID) 
-        REFERENCES "Prompt"(promptID)
+        REFERENCES "prompt"(promptID)
 );
 
 -- Ajout de contraintes pour les relations
-ALTER TABLE "User"
+ALTER TABLE "user"
 ADD CONSTRAINT fk_group_user
 FOREIGN KEY (groupID) 
-REFERENCES "Group"(groupID);
+REFERENCES "group"(groupID);
 
-ALTER TABLE "Prompt"
+ALTER TABLE "prompt"
 ADD CONSTRAINT fk_user_prompt
 FOREIGN KEY (userID) 
-REFERENCES "User"(userID);
+REFERENCES "user"(userID);
 
-ALTER TABLE "Vote"
+ALTER TABLE "vote"
 ADD CONSTRAINT fk_user_vote
 FOREIGN KEY (userID) 
-REFERENCES "User"(userID);
+REFERENCES "user"(userID);
 
-ALTER TABLE "Vote"
+ALTER TABLE "vote"
 ADD CONSTRAINT fk_prompt_vote
 FOREIGN KEY (promptID) 
-REFERENCES "Prompt"(promptID);
+REFERENCES "prompt"(promptID);
 
-ALTER TABLE "Note"
+ALTER TABLE "note"
 ADD CONSTRAINT fk_user_note
 FOREIGN KEY (userID) 
-REFERENCES "User"(userID);
+REFERENCES "user"(userID);
 
-ALTER TABLE "Note"
+ALTER TABLE "note"
 ADD CONSTRAINT fk_prompt_note
 FOREIGN KEY (promptID) 
-REFERENCES "Prompt"(promptID);
+REFERENCES "prompt"(promptID);
