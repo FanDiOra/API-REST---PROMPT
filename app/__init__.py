@@ -15,7 +15,7 @@ def create_app(config_class='app.config.Config'):
     migrate.init_app(app, db)
     jwt.init_app(app)
 
-    from app import routes, models
-    app.register_blueprint(routes.bp)
+    from app import routes
+    app.register_blueprint(routes.bp, url_prefix='/api')
 
     return app
