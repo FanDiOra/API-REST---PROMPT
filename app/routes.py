@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 bp = Blueprint('api', __name__)
 
-# ----------------------------- ADMIN / Utilisateur -----------------------------------
+# ----------------------------- Gestion Utilisateur -----------------------------------
 # Connexion (création du super admin)
 @bp.route('/admin/register', methods=['POST'])
 def create_user_without_auth():
@@ -91,7 +91,8 @@ def delete_user(user_id):
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message': 'User deleted successfully'})
-# ----------------------------- ADMIN / Group -----------------------------------
+
+# ----------------------------- Gestion Groupe -----------------------------------
 # Créer un groupe d'utilisateurs
 @bp.route('/admin/group', methods=['POST'])
 @jwt_required()
@@ -121,6 +122,18 @@ def list_groups():
         'name': group.name,
         'users': [{'userID': user.userID, 'firstname': user.firstname, 'lastname': user.lastname} for user in group.users]
     } for group in groups])
+
+# Lister un groupe d'utilisateurs
+@bp.route('/admin/group/<int:group_id>', methods=['GET'])
+@jwt_required()
+def get_group(group_id):
+    group = Group.query.get_or_404(group_id)
+    return jsonify({
+        'groupID': group.groupID,
+        'name': group.name,
+        'users': [{'userID': user.userID, 'firstname': user.firstname, 'lastname': user.lastname} for user in group.users]
+    })
+
 
 # Modifier un groupe d'utilisateurs
 @bp.route('/admin/group/<int:group_id>', methods=['PUT'])
@@ -157,3 +170,70 @@ def delete_group(group_id):
     db.session.commit()
     
     return jsonify({'message': 'Group deleted successfully'})
+
+# ----------------------------- Gestion Prompts -----------------------------------
+# Créer un prompt
+@bp.route('/prompt', methods=['POST'])
+@jwt_required()
+def create_prompt():
+    data = request.get_json()
+    current_user = get_jwt_identity()
+    new_prompt = Prompt(
+        content=data['content'],
+        status='en attente',  # Statut initial
+        user_id=current_user
+    )
+    db.session.add(new_prompt)
+    db.session.commit()
+    return jsonify({'message': 'Prompt created successfully'}), 201
+
+# Modifier un prompt
+@bp.route('/prompt/<int:prompt_id>', methods=['PUT'])
+@jwt_required()
+def update_prompt(prompt_id):
+    data = request.get_json()
+    prompt = Prompt.query.get_or_404(prompt_id)
+    prompt.content = data['content']
+    prompt.status = data['status']
+    prompt.price = data['price']
+    db.session.commit()
+    return jsonify({'message': 'Prompt updated successfully'})
+
+# Supprimer un prompt
+@bp.route('/prompt/<int:prompt_id>', methods=['DELETE'])
+@jwt_required()
+def delete_prompt(prompt_id):
+    prompt = Prompt.query.get_or_404(prompt_id)
+    db.session.delete(prompt)
+    db.session.commit()
+    return jsonify({'message': 'Prompt deleted successfully'})
+
+# Lister les prompts
+@bp.route('/prompts', methods=['GET'])
+@jwt_required()
+def list_prompts():
+    prompts = Prompt.query.all()
+    return jsonify([{
+        'promptID': prompt.promptID,
+        'content': prompt.content,
+        'status': prompt.status,
+        'price': prompt.price,
+        'creation_date': prompt.creation_date,
+        'edit_date': prompt.edit_date,
+        'user_id': prompt.user_id
+    } for prompt in prompts])
+
+# Lister les prompts par utilisateur
+@bp.route('/user/<int:user_id>/prompts', methods=['GET'])
+@jwt_required()
+def list_prompts_by_user(user_id):
+    prompts = Prompt.query.filter_by(user_id=user_id).all()
+    return jsonify([{
+        'promptID': prompt.promptID,
+        'content': prompt.content,
+        'status': prompt.status,
+        'price': prompt.price,
+        'creation_date': prompt.creation_date,
+        'edit_date': prompt.edit_date,
+        'user_id': prompt.user_id
+    } for prompt in prompts])
